@@ -6,7 +6,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_NAME="ngsstatisticalgenetics"
-OUTPUT_DIR="$HOME/Desktop"
+OUTPUT_DIR="$SCRIPT_DIR"
 ZIP_NAME="${PROJECT_NAME}.zip"
 
 log() {
@@ -103,7 +103,7 @@ log "File size: $FILE_SIZE"
 # 検証用の展開テスト
 log ""
 log "Performing extraction test..."
-TEST_DIR="$HOME/Desktop/test_extraction"
+TEST_DIR="$SCRIPT_DIR/test_extraction"
 rm -rf "$TEST_DIR"
 mkdir -p "$TEST_DIR"
 cd "$TEST_DIR"
