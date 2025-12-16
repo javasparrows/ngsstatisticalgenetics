@@ -1,0 +1,64 @@
+# コード1
+sudo apt-get install r-base
+sudo apt-get install r-base-dev
+sudo apt-get install r-cran-*
+
+# コード2
+wget @https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
+~/miniconda3/bin/conda init bash
+source ~/.bashrc
+
+# コード3
+conda install -c anaconda numpy
+
+# コード4
+git clone https://github.com/choishingwan/PRSice.git
+cd PRSice
+g++ --std=c++11 -I inc/ -isystem lib/ -DNDEBUG -O3 -march=native src/*.cpp -lz -lpthread -o PRSice
+
+# コード5 
+git clone https://github.com/getian107/PRScs.git
+
+# コード13
+plink --bfile EUR.QC --clump-p1 1 --clump-r2 0.1 --clump-kb 250 --clump Height.QC.Transformed --clump-snp-field SNP --clump-field P --out EUR
+less -S EUR.clumped
+
+# コード14
+plink --bfile EUR.QC --extract EUR.clumped --score Height.QC.Transformed 3 4 12 header --out EUR
+less -S EUR.profile
+
+# コード15
+Rscript PRSice.R –prsice PRSice_linux --base Height.QC.gz --target EUR.QC --binary-target F --pheno EUR.height --cov EUR.cov --stat OR --or --out EUR
+less -S EUR.best
+
+# コード17
+python3 PRScs.py --ref_dir=ldblk_1kg_eur --bim_prefix=EUR.QC --sst_file=Height.QC.Transformed2 --n_gwas=388028 --out_dir=EUR
+less EUR_pst_eff_a1_b0.5_phiauto_chr1.txt
+
+# コード18
+cat EUR_pst_eff_a1_b0.5_phiauto_chr*.txt > EUR_pst_eff_a1_b0.5_phiauto.txt
+plink --bfile EUR.QC --score EUR_pst_eff_a1_b0.5_phiauto.txt 2 5 6 header --out EURPRSCS
+less -S EURPRSCS.profile
+
+# コード19
+mkdir tmp-data
+vi ldpred2.R
+
+# コード21
+Rscript ldpred2.R
+less -S inf-answer.txt
+
+# コード22
+vi lassosum.R
+
+# コード24
+Rscript lassosum.R
+less -S lassosum.txt
+
+# コード25
+vi stmgp.R
+
+# コード27
+Rscript stmgp.R
+less -S stmgp.txt

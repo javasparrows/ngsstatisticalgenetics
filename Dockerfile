@@ -76,18 +76,18 @@ COPY --from=builder /build/tools /workspace/tools
 # Set PATH to include our tools
 ENV PATH="/workspace/tools/bin:/workspace/tools:/workspace/tools/gatk-4.3.0.0:${PATH}"
 
-# Create non-root user for security
-RUN useradd -m -u 1000 -s /bin/bash researcher
-RUN chown -R researcher:researcher /workspace
-USER researcher
-
 # Copy command files and scripts
 COPY command_files/ /workspace/command_files/
 COPY scripts/ /workspace/scripts/
 COPY run_all.sh /workspace/
 
-# Make scripts executable
+# Make scripts executable before changing ownership
 RUN chmod +x /workspace/run_all.sh /workspace/command_files/*.sh /workspace/scripts/*.sh
+
+# Create non-root user for security
+RUN useradd -m -u 1000 -s /bin/bash researcher
+RUN chown -R researcher:researcher /workspace
+USER researcher
 
 # Set default command
 CMD ["/bin/bash"]

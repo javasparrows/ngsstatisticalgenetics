@@ -1,0 +1,382 @@
+# コード1
+# ホームフォルダへ移動する
+cd
+# ファイルやソフトを格納するフォルダを作成する
+mkdir variant_call
+cd variant_call
+mkdir tools
+mkdir materials
+mkdir intermediate
+mkdir results
+# ソフトの実行のためにvariant_call内のtoolsにパスを通す．環境や必要性に応じて適当な記述が必要となる
+export PATH=/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools:$PATH
+
+# コード2
+# Javaが存在する場合，Java のバージョンが表示される
+java -version
+
+# コード3
+# Pythonが存在する場合，Pythonのバージョンが表示される
+python -–version
+
+# コード4
+# 2023年1月段階での最新
+cd /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools
+wget https://github.com/samtools/samtools/releases/download/1.16.1/samtools-1.16.1.tar.bz2
+# ダウンロードしてきたsamtoolsの解凍
+tar -jxvf samtools-1.16.1.tar.bz2
+cd samtools-1.16.1
+# prefix指定では絶対パスのみ有効．
+# ${PWD%/*}で/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/toolsの絶対パスを使用する
+./configure --prefix=${PWD%/*}
+make
+make install
+# インストール後，コマンドが認識されない場合は，パスが通っているかを確認する
+samtools
+# 正しくインストールされていれば，samtoolsの使用法が表示される
+
+# コード5
+# GitHub経由でダウンロードしたソースコードをコンパイルする
+# GitHubページにはprecompiled binariesをダウンロードし，インストールする方法も記載されている
+cd /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools
+git clone --recursive https://github.com/bwa-mem2/bwa-mem2
+cd bwa-mem2
+make
+./bwa-mem2
+# 正しくインストールされていれば，使用法が表示される
+
+# コード6
+# 2022年10月段階での最新
+cd /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools
+wget https://github.com/broadinstitute/gatk/releases/download/4.3.0.0/gatk-4.3.0.0.zip
+unzip gatk-4.3.0.0.zip
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk
+# 正しくインストールされていれば，使用法が表示される
+
+# コード7
+gatk --java-options "-Xmx4g" HaplotypeCaller \
+--reference reference.fasta \
+--input input.bam \
+-O output.g.vcf.gz \
+-ERC GVCF
+
+# コード8
+# 30xのFASTQファイルをダウンロード（各ファイル約30GB）
+cd /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials
+wget https://zenodo.org/record/7306771/files/HG005_Son.R1.fastq.gz
+wget https://zenodo.org/record/7307245/files/HG005_Son.R2.fastq.gz
+wget https://zenodo.org/record/7307258/files/HG006_Father.R1.fastq.gz
+wget https://zenodo.org/record/7307266/files/HG006_Father.R2.fastq.gz
+wget https://zenodo.org/record/7307277/files/HG007_Mother.R1.fastq.gz
+wget https://zenodo.org/record/7307283/files/HG007_Mother.R2.fastq.gz
+
+
+x aria2c -x 8 -s 8 -c https://zenodo.org/record/7306771/files/HG005_Son.R1.fastq.gz
+  aria2c -x 8 -s 8 -c https://zenodo.org/record/7307245/files/HG005_Son.R2.fastq.gz
+x aria2c -x 8 -s 8 -c https://zenodo.org/record/7307258/files/HG006_Father.R1.fastq.gz
+  aria2c -x 8 -s 8 -c https://zenodo.org/record/7307266/files/HG006_Father.R2.fastq.gz
+x aria2c -x 8 -s 8 -c https://zenodo.org/record/7307277/files/HG007_Mother.R1.fastq.gz
+  aria2c -x 8 -s 8 -c https://zenodo.org/record/7307283/files/HG007_Mother.R2.fastq.gz
+
+# 10xのFASTQファイルをダウンロード（各ファイル約10GB）
+cd /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials
+wget https://zenodo.org/record/7310196/files/HG005_Son.R1.10X.fastq.gz
+wget https://zenodo.org/record/7310196/files/HG005_Son.R2.10X.fastq.gz
+wget https://zenodo.org/record/7310202/files/HG006_Father.R1.10X.fastq.gz
+wget https://zenodo.org/record/7310202/files/HG006_Father.R2.10X.fastq.gz
+wget https://zenodo.org/record/7310233/files/HG007_Mother.R1.10X.fastq.gz
+wget https://zenodo.org/record/7310233/files/HG007_Mother.R2.10X.fastq.gz
+
+aria2c -x 8 -s 8 -c https://zenodo.org/record/7310196/files/HG005_Son.R1.10X.fastq.gz
+aria2c -x 8 -s 8 -c https://zenodo.org/record/7310196/files/HG005_Son.R2.10X.fastq.gz
+aria2c -x 8 -s 8 -c https://zenodo.org/record/7310202/files/HG006_Father.R1.10X.fastq.gz
+aria2c -x 8 -s 8 -c https://zenodo.org/record/7310202/files/HG006_Father.R2.10X.fastq.gz
+aria2c -x 8 -s 8 -c https://zenodo.org/record/7310233/files/HG007_Mother.R1.10X.fastq.gz
+aria2c -x 8 -s 8 -c https://zenodo.org/record/7310233/files/HG007_Mother.R2.10X.fastq.gz
+
+# コード9
+# JG2.1.0のFASTAファイルをダウンロード
+cd /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials
+wget https://jmorp.megabank.tohoku.ac.jp/datasets/tommo-jg2.1.0-20211208/files/jg2.1.0.fa.gz
+gzip -cd jg2.1.0.fa.gz> JG.fa && rm jg2.1.0.fa.gz
+# BQSRおよびVQSR用に必要となるGATK Resource BundleのJG2.1.0対応版をダウンロード
+cd /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials
+wget https://jmorp.megabank.tohoku.ac.jp/datasets/tommo-jg2.1.0-20211208/files/JG2.1.0-ResourceBundle-from-b37.zip
+unzip JG2.1.0-ResourceBundle-from-b37.zip && rm JG2.1.0-ResourceBundle-fromb37.zip
+
+# コード10
+# GRCh37(hs37d5)のFASTAファイルのダウンロード
+wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz
+gzip -d hs37d5.fa.gz
+# GRCh38のFASTAファイルのダウンロード
+wget ftp://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/analysisSet/hg38.analysisSet.fa.gz
+gzip -d hg38.analysisSet.fa.gz
+
+# コード11
+# GRCh37／GRCh38のGATK Resource Bundleは現在Google Cloud Storageで管理されており，ファイルをダウンロードするにはgsutilが必要
+# GRCh37(h19)のGATK Resource Bundle のダウンロード
+gsutil -m cp -r "gs://gcp-public-data--broad-references/hg38" /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials
+# GRCh38のGATK Resource Bundleのダウンロード
+gsutil -m cp -r "gs://gcp-public-data--broad-references/hg19" /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials
+
+# コード12
+# FASTAファイルのインデックスの作成
+# bwa-mem2 indexでは多くのRAMとストレージを必要とする．https://doi.org/10.5281/zenodo.7567194の全ダウンロードをmaterials内に配置することで実行結果の代用にできる
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/bwa-mem2/bwa-mem2 index /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa
+# FASTAファイルのfasta.faiの作成（関連必要ファイル）
+samtools index /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa
+# FASTAファイルのdictionaryの作成（関連必要ファイル）
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk CreateSequenceDictionary --REFERENCE /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa
+# アライメントの実行
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/bwa-mem2/bwa-mem2 mem -R "@RG\tID:son\tSM:son\tPL:Illumina\tLB:son" /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/HG005_Son.R1.fastq.gz /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/HG005_Son.R2.fastq.gz >/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.sam
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/bwa-mem2/bwa-mem2 mem -R "@RG\tID:father\tSM:father\tPL:Illumina\tLB:father" /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/HG006_Father.R1.fastq.gz /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/HG006_Father.R2.fastq.gz >/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/father.sam
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/bwa-mem2/bwa-mem2 mem -R "@RG\tID:mother\tSM:mother\tPL:Illumina\tLB:mother" /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/HG007_Mother.R1.fastq.gz /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/HG007_Mother.R2.fastq.gz >/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/mother.sam
+
+# SAMファイルをBAMファイルへ変換する
+# 結果確認のため，headコマンドでSAMファイルの冒頭行を表示する
+samtools view -bS /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.sam | head
+samtools view -bS /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.sam | head
+samtools view -bS /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.sam | head
+
+# ファイル不足等の際には，以下のコマンドによるBAMファイルの完成後，SAMファイルを削除してもよい
+samtools view -bS /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.sam > /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.bam
+samtools view -bS /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/father.sam > /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/father.bam
+samtools view -bS /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/mother.sam > /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/mother.bam
+
+# コード13
+# BAMファイルをソートする
+samtools sort -o /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.sort.bam /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.bam
+samtools sort -o /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/father.sort.bam /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/father.bam
+samtools sort -o /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/mother.sort.bam /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/mother.bam
+# ソートしたBAMファイルのインデックスを作成
+samtools index /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.sort.bam
+samtools index /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/father.sort.bam
+samtools index /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/mother.sort.bam
+# 重複したリードを除去するMarkDuplicatesを行う
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk MarkDuplicates \
+--INPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.sort.bam \
+--OUTPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/son.sort.markdup.bam \
+--METRICS_FILE /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/son.sort.markdup.metrics.txt
+--CREATE_INDEX TRUE
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk MarkDuplicates \
+--INPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/father.sort.bam \
+--OUTPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/father.sort.markdup.bam \
+--METRICS_FILE /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/father.sort.markdup.metrics.txt
+--CREATE_INDEX TRUE
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk MarkDuplicates \
+--INPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/mother.sort.bam \
+--OUTPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/mother.sort.markdup.bam \
+--METRICS_FILE /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/mother.sort.markdup.metrics.txt \
+--CREATE_INDEX TRUE
+
+# 結果確認のため，headコマンドでBAMファイルの冒頭行を表示する
+# なお，header行が必要な場合はsamtools view -h hoge.bamとなる
+samtools view -bS /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/son.sort.markdup.bam|head
+samtools view -bS /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/father.sort.markdup.bam|head
+samtools view -bS /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/mother.sort.markdup.bam|head
+
+# コード14
+# BQSR
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk BaseRecalibrator --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa --input /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/son.sort.markdup.bam \
+  --known-sites /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.dbsnp_138.b37.success.sorted.vcf.gz \
+  --known-sites /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.Mills_and_1000G_gold_standard.indels.b37.success.sorted.vcf.gz \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son_recal_data.table
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk ApplyBQSR --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --input /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/son.sort.markdup.bam \
+  --bqsr-recal-file /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son_recal_data.table \
+  --create-output-bam-index true \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/son.bqsr.bam
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk BaseRecalibrator --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa --input /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/father.sort.markdup.bam \
+  --known-sites /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.dbsnp_138.b37.success.sorted.vcf.gz \
+  --known-sites /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.Mills_and_1000G_gold_standard.indels.b37.success.sorted.vcf.gz \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/father_recal_data.table
+  
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk ApplyBQSR --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --input /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/father.sort.markdup.bam \
+  --bqsr-recal-file /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/father_recal_data.table \
+  --create-output-bam-index true \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/father.bqsr.bam
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk BaseRecalibrator --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa --input /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/mother.sort.markdup.bam \
+  --known-sites /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.dbsnp_138.b37.success.sorted.vcf.gz \
+  --known-sites /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.Mills_and_1000G_gold_standard.indels.b37.success.sorted.vcf.gz \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/mother_recal_data.table
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk ApplyBQSR --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --input /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/mother.sort.markdup.bam \
+  --bqsr-recal-file /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/mother_recal_data.table \
+  --create-output-bam-index true \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/mother.bqsr.bam
+
+# コード15
+# BAM→GVCFへのバリアントコールを実行（今回はBQSR不実行）
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" HaplotypeCaller \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --emit-ref-confidence GVCF \
+  --input /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/son_sort.markdup.bam \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.g.vcf
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" HaplotypeCaller \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --emit-ref-confidence GVCF \
+  --input /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/father_sort.markdup.bam \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/father.g.vcf
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" HaplotypeCaller \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --emit-ref-confidence GVCF \
+  --input /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/mother_sort.markdup.bam \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/mother.g.vcf
+
+# 通例GVCF→VCFは染色体ごとに分割して実行する. databaseにまとめて，ジェノタイピングを行っている.
+# ここの部分はfor文であるため，シェルスクリプトファイル（.sh）にして実行するとよい．
+
+for chr in chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12
+chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY chrM
+do
+  /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" GenomicsDBImport \
+    --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/son.g.vcf \
+    --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/father.g.vcf \
+    --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/mother.g.vcf \
+    --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+    --genomicsdb-workspace-path /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/genomics_database.${chr} \
+    --intervals ${chr}
+  /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" GenotypeGVCFs \
+    --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+    --variant gendb:///Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/genomics_database.${chr} \
+    --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/joint_genotyped.${chr}.vcf \
+    --intervals ${chr}
+done
+
+# 染色体ごとのVCFを統合する
+# ここの部分もfor文であるため，シェルスクリプトファイル（.sh）にして実行するとよい.
+
+input_files=""
+for chr in chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12
+chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY chrM
+do
+  input_files+=" --INPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/joint_genotyped.${chr}.vcf
+done
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4G" MergeVcfs \
+  --OUTPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/merged.vcf.gz \
+  ${input_files}
+
+# コード16
+# SNV（SNP）についてVariantRecalibratorでrecalibration modelを作成する
+# 一般に1塩基の変異はSNVと呼び，その中でも1％以上の頻度で変異が認められた場合をSNP（一塩基多型）と呼ぶ
+# HapMapのリソースを利用しない場合
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" VariantRecalibrator \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.vcf.gz \
+  --resource:omni,known=false,training=true,truth=false,prior=12.0 /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.1000G_omni2.5.b37.success.sorted.vcf.gz \
+  --resource:1000G,known=false,training=true,truth=false,prior=10.0 /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.1000G_phase1.snps.high_confidence.b37.success.sorted.vcf.gz
+  --resource:dbsnp,known=true,training=false,truth=false,prior=2.0 /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.dbsnp_138.b37.success.sorted.vcf.gz \
+  --use-annotation QD --use-annotation MQ --use-annotation MQRankSum --use-annotation ReadPosRankSum --use-annotation FS --use-annotation SOR \
+  --mode SNP \
+  --max-gaussians 6 \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/snv.recal \
+  --tranches-file /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/snv.tranches
+
+# （参考）HapMapのリソースを利用する場合
+bcftools norm -m-snps -o /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.hapmap_3.3.b37.success.sorted.temp /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.hapmap_3.3.b37.success.sorted.vcf.gz
+
+bcftools norm -D -o /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.hapmap_3.3.b37.success.sorted.temp2.vcf /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.hapmap_3.3.b37.success.sorted.temp.vcf
+
+bcftools norm -m+snps -o /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.hapmap_3.3.b37.success.sorted.modified.vcf /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.hapmap_3.3.b37.success.sorted.temp2. vcf
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" VariantRecalibrator \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.snv.vcf.gz \
+  --resource:hapmap,known=false,training=true,truth=true,prior=15.0 /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.hapmap_3.3.b37.success.modified.vcf \
+  --resource:omni,known=false,training=true,truth=false,prior=12.0 /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.1000G_omni2.5.b37.success.sorted.vcf.gz \
+  --resource:1000G,known=false,training=true,truth=false,prior=10.0 /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.1000G_phase1.snps.high_confidence.b37.success.sorted.vcf.gz \
+  --resource:dbsnp,known=true,training=false,truth=false,prior=2.0 /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.dbsnp_138.b37.success.sorted.vcf.gz \
+  --use-annotation QD --use-annotation MQ --use-annotation MQRankSum --use-annotation ReadPosRankSum --use-annotation FS --use-annotation SOR \
+  --mode SNP \
+  --max-gaussians 6 \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/snv.recal \
+  --tranches-file /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/snv.tranches
+
+# indelについてVariantRecalibratorでrecalibration modelを作成する
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" VariantRecalibrator \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.indel.vcf.gz \
+  --resource:dbsnp,known=true,training=false,truth=false,prior=2.0 /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.dbsnp_138.b37.success.sorted.vcf.gz \
+  --resource:mills,known=false,training=true,truth=true,prior=12.0 /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG2.1.0-ResourceBundle-from-b37/human_g1k_v37_to_JG2.1.0.Mills_and_1000G_gold_standard.indels.b37.success.sorted.vcf.gz \
+  --use-annotation QD --use-annotation MQ --use-annotation MQRankSum --use-annotation ReadPosRankSum --use-annotation FS --use-annotation SOR \
+  --mode INDEL \
+  --max-gaussians 4 \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/indel.recal \
+  --tranches-file /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/indel.tranches
+
+# SNVとindelのそれぞれに構築したrecalibration modelをApplyVQSRで利用する
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" ApplyVQSR \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.snv.vcf.gz \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.snv.vqsr.vcf.gz \
+  --tranches-file /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/snv.tranches \
+  --recal-file /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/snv.recal \
+  --create-output-variant-index true \
+  -mode SNP
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" ApplyVQSR \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.indel.vcf.gz \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.indel.vqsr.vcf.gz \
+  --tranches-file /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/indel.tranches \
+  --recal-file /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/indel.recal \
+  --create-output-variant-index true \
+  -mode INDEL
+
+# SNVとindelのそれぞれでフィルタリングしたVCFをMergeVcfsで1つに統合する
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4G" MergeVcfs \
+  --OUTPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/merged.vqsr.vcf.gz \
+  --INPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.snv.vqsr.vcf.gz \
+  --INPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.indel.vqsr.vcf.gz
+
+# コード17
+# 検出されたバリアントをフィルタリングするためにSNVとindelに分割する
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" SelectVariants \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/merged.vcf.gz \
+  --select-type-to-include SNP \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.snv.vcf.gz
+
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" SelectVariants \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/merged.vcf.gz \
+  --select-type-to-include INDEL \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.indel.vcf.gz
+
+# VCFファイルの統計量について，事前に設定しておいた値をもとにVariantFiltrationでフィルタリングする
+# SNVの設定
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" VariantFiltration \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.snv.vcf.gz \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.snv.hardfiltering.vcf.gz \
+  --filter-expression "QD < 2.0" \
+  --filter-expression "FS > 60.0" \
+  --filter-expression "SOR > 3.0" \
+  --filter-expression "ReadPosRankSum < -8.0" \
+  --filter-expression "MQ < 40.0" \
+  --filter-expression "MQRankSum < -12.5"
+# indelの設定
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" VariantFiltration \
+  --reference /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/materials/JG.fa \
+  --variant /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.indel.vcf.gz \
+  --output /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.indel.hardfiltering.vcf.gz \
+  --filter-expression "QD < 2.0" \
+  --filter-expression "FS > 200.0" \
+  --filter-expression "SOR > 10.0" \
+  --filter-expression "ReadPosRankSum < -20.0"
+# SNVとINDELのそれぞれでフィルタリングしたVCFをMergeVcfsで1つに統合する
+/Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4G" MergeVcfs \
+  --OUTPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/results/merged.hardfiltering.vcf.gz \
+  --INPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.snv.hardfiltering.vcf.gz \
+  --INPUT /Users/yukik/Work/Tohoku/perple/ngsstatisticalgenetics/variant_call/intermediate/merged.indel.hardfiltering.vcf.gz

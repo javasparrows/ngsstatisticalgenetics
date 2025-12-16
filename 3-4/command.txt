@@ -1,0 +1,167 @@
+# コード1
+wget https://dataverse.harvard.edu/api/access/datafile/6170506
+wget https://dataverse.harvard.edu/api/access/datafile/6170501
+wget https://dataverse.harvard.edu/api/access/datafile/6170502
+wget https://dataverse.harvard.edu/api/access/datafile/6170521
+wget https://dataverse.harvard.edu/api/access/datafile/6170511
+wget https://dataverse.harvard.edu/api/access/datafile/6170516
+wget https://dataverse.harvard.edu/api/access/datafile/6170505
+wget https://dataverse.harvard.edu/api/access/datafile/6170513
+wget https://dataverse.harvard.edu/api/access/datafile/6165867
+wget https://dataverse.harvard.edu/api/access/datafile/6170507
+wget https://dataverse.harvard.edu/api/access/datafile/6170517
+wget https://dataverse.harvard.edu/api/access/datafile/6170520
+wget https://dataverse.harvard.edu/api/access/datafile/6170503
+wget https://dataverse.harvard.edu/api/access/datafile/6170509
+wget https://dataverse.harvard.edu/api/access/datafile/6170515
+wget https://dataverse.harvard.edu/api/access/datafile/6170518
+wget https://dataverse.harvard.edu/api/access/datafile/6170510
+wget https://dataverse.harvard.edu/api/access/datafile/6170508
+wget https://dataverse.harvard.edu/api/access/datafile/6170514
+wget https://dataverse.harvard.edu/api/access/datafile/6170512
+wget https://dataverse.harvard.edu/api/access/datafile/6170519
+wget https://dataverse.harvard.edu/api/access/datafile/6170504
+
+# コード2
+docker pull zilinli/staarpipeline:0.9.6
+
+# コード3
+library(devtools)
+devtools::install_github("xihaoli/STAAR")
+devtools::install_github("xihaoli/STAARpipeline", ref="main")
+devtools::install_github("xihaoli/STAARpipelineSummary", ref="main")
+
+# コード5
+#!/bin/sh
+#SBATCH -a 1-290:1
+
+arrayid=${SLURM_ARRAY_TASK_ID}
+Rscript STAARpipeline_Individual_Analysis.r $arrayid
+
+# コード6
+conda install -c bioconda xsv
+
+# コード7
+#!/bin/sh
+#SBATCH -a 1-22:1
+
+chr= ${SLURM_ARRAY_TASK_ID}
+Rscript Varinfo_gds.R $chr
+
+# コード8
+#!/bin/sh
+#SBATCH -a 1-22:1
+
+chr= ${SLURM_ARRAY_TASK_ID}
+Rscript Annotate.R $chr
+
+# コード9
+#!/bin/sh
+#SBATCH -a 1-22:1
+
+chr= ${SLURM_ARRAY_TASK_ID}
+Rscript gds2agds.R $chr
+
+# コード13
+Rscript STAARpipeline_Null_Model.r
+
+# コード16
+#!/bin/sh
+#SBATCH -a 1-290:1
+
+arrayid=${SLURM_ARRAY_TASK_ID}
+Rscript STAARpipeline_Individual_Analysis.r $arrayid
+
+# コード17
+#!/bin/sh
+#SBATCH -a 1-379
+
+arrayid=${SLURM_ARRAY_TASK_ID}
+Rscript STAARpipeline_Gene_Centric_Coding.r $arrayid
+
+# コード18 
+#!/bin/sh
+#SBATCH -a 1-2
+
+arrayid=${SLURM_ARRAY_TASK_ID}
+Rscript STAARpipeline_Gene_Centric_Coding_Long_Masks.r $arrayid
+
+# コード19
+#!/bin/sh
+#SBATCH -a 1-379
+
+arrayid=${SLURM_ARRAY_TASK_ID}
+Rscript STAARpipeline_Gene_Centric_Noncoding.r $arrayid
+
+# コード20
+#!/bin/sh
+#SBATCH -a 1-8
+
+arrayid=${SLURM_ARRAY_TASK_ID}
+Rscript STAARpipeline_Gene_Centric_Noncoding_Long_Masks.r $arrayid
+
+# コード21
+#!/bin/sh
+#SBATCH -a 1-222
+
+arrayid=${SLURM_ARRAY_TASK_ID}
+Rscript STAARpipeline_Gene_Centric_ncRNA.r $arrayid
+
+# コード22
+#!/bin/sh
+arrayid=1
+Rscript STAARpipeline_Gene_Centric_ncRNA_Long_Masks.r $arrayid
+
+# コード24
+#!/bin/sh
+#SBATCH -a 1-566
+
+arrayid=${SLURM_ARRAY_TASK_ID}
+Rscript STAARpipeline_Sliding_Window.r $arrayid
+
+# コード25
+Rscript STAARpipeline_STAAR2SCANG.r
+
+# コード27
+#!/bin/sh
+#SBATCH -a 1-1500
+
+arrayid=${SLURM_ARRAY_TASK_ID}
+Rscript STAARpipeline_Dynamic_Window.r $arrayid
+
+# コード28
+#!/bin/sh
+#SBATCH -a 1-22
+
+chr=${SLURM_ARRAY_TASK_ID}
+Rscript STAARpipelineSummary_Known_Loci_Pruning.r $chr
+
+# コード29
+Rscript STAARpipelineSummary_Known_Loci_Pruning_Combination.r
+
+# コード30
+Rscript STAARpipelineSummary_Individual_Analysis.r
+
+# コード31
+Rscript STAARpipelineSummary_Gene_Centric_Coding.r
+
+# コード32
+Rscript STAARpipelineSummary_Gene_Centric_Noncoding.r
+
+# コード33
+Rscript STAARpipelineSummary_Sliding_Window.r
+
+# コード34
+Rscript STAARpipelineSummary_Dynamic_Window.r
+
+# コード35
+Rscript STAARpipelineSummary_Individual_Analysis_Annotation.r
+
+# コード36
+Rscript STAARpipelineSummary_Gene_Centric_Coding_Annotation.r
+
+# コード37
+Rscript STAARpipelineSummary_Gene_Centric_Noncoding_Annotation.r
+
+# コード38
+Rscript STAARpipelineSummary_Genetic_Region_Annotation.r

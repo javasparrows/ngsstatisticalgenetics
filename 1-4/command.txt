@@ -1,0 +1,53 @@
+# コード1
+# 公式サイトからdockerイメージをダウンロード
+singularity pull docker://brentp/smoove
+# インストールできたかの確認．下記のコマンドを実行すると，
+# 必要なソフトがインストールされていれば[Y]と表示され，
+# インストールされていなければ[ ]となる
+singularity exec smoove_latest.sif smoove -h
+# 以下，コマンドの使い方が示される
+
+# コード2
+wget https://github.com/hall-lab/speedseq/blob/master/annotations/ceph18.b37.lumpy.exclude.2014-01-15.bed
+wget https://github.com/hall-lab/speedseq/blob/master/annotations/exclude.cnvnator_100bp.GRCh38.20170403.bed
+
+# コード3
+# 1000人ゲノムプロジェクトの30X GRCh38版を4人分ダウンロード
+mkdir -p cram
+cd cram
+wget -c ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR324/ERR3240193/HG00118.final.cram
+wget -c ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR324/ERR3240144/HG00138.final.cram
+wget -c ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR324/ERR3240146/HG00140.final.cram
+wget -c ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR324/ERR3240150/HG00145.final.cram
+# 基準ゲノムのダウンロード
+wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa
+
+# コード4
+# 出力はmy-cohort-smoove.genotyped.vcf.gzとなる
+# hg19/b37, hg38/b38のどちらかのproblematic regionをbed変数に格納する
+# 今回はhg38なので，hg38の場合
+reference_fasta=GRCh38_full_analysis_set_plus_decoy_hla.fa
+bed=exclude.cnvnator_100bp.GRCh38.20170403.bed
+# hg19の場合は以下のようにする
+# reference_fasta=hs37d5.fa
+# bed=ceph18.b37.lumpy.exclude.2014-01-15.bed
+# CPUのコア数（ハイパースレッディング対応の場合はスレッド数）に応じて値を決める
+threads=16
+
+# コード5
+# smooveの実行
+smoove call --removepr \
+--name my-cohort \
+--exclude ${bed} \
+--fasta ${reference_fasta} \
+--processes ${threads} \
+--genotype \
+./cram/*.cram
+
+
+# コード6
+set -euo pipefail
+lumpy -msw 4 -mw 4 -t $(mktemp) -tt 0 -P \
+-pe id:HG00118-final,bam_file:.//HG00118-final.disc.bam,histo_file:.//HG00118-final.histo,mean:436.25,stdev:102.95,read_length:150,min_non_overlap:150,discordant_z:2.75,back_distance:30,weight:1,min_mapping_threshold:20-sr id:HG00118-final,bam_file:.//HG00118-final.split.bam,back_distance:10,weight:1,min_mapping_threshold:20
+# …
+# （以下検体名のみが異なる-pe, -sr の行が続くため省略）

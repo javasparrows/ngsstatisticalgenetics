@@ -1,0 +1,81 @@
+# コード1
+# 最新のSnpEff／SnpSiftをダウンロードする
+wget https://snpeff.blob.core.windows.net/versions/snpEff_latest_core.zip
+
+# ZIP形式でダウンロードされるため，解凍する
+unzip snpEff_latest_core.zip
+
+# 解凍したファイルへ移動
+cd snpEff
+
+# コード2
+## JGベースのアノテーション情報
+# フォルダの準備./dataとその中にJG2.1.0というディレクトリを作る
+mkdir -p ~/snpEff_latest_core/data/JG2.1.0
+# JGのデータベースのダウンロード．作成したdata/JG2.1.0 内に
+# アノテーションに必要なデータベースを配置する
+wget -P data/JG2.1.0 https://zenodo.org/record/7503342/files/snpEffectPredictor.bin
+## GRCh37ベースのアノテーション情報（SnpEff/SnpSiftより）
+# GRCh37のデータベースのダウンロード
+java -jar snpEff.jar download GRCh37.75
+# SnpEffコマンドからダウンロードできるデータベースの例（参考）
+java -jar snpEff.jar databases | grep Homo_sapiens # ヒト
+java -jar snpEff.jar databases | grep Drosophila # ショウジョウバエ
+
+# コード3
+# JGベースのVCFファイル（merged.vqsr.vcf.gz）のダウンロード
+wget -P ~/snpEff_latest_core/examples https://zenodo.org/record/7519222/files/merged.vqsr.vcf.gz
+
+# コード4
+# Japanese population
+JG2.1.0.genome:Human genome JG2.1.0
+    JG2.1.0.M.codonTable : Vertebrate_Mitochondrial
+
+# コード5
+# GRCh37を使用する場合
+wget https://snpeff.blob.core.windows.net/databases/dbs/GRCh37/dbNSFP_4.1a/dbNSFP4.1a.txt.gz
+wget https://snpeff.blob.core.windows.net/databases/dbs/GRCh37/dbNSFP_4.1a/dbNSFP4.1a.txt.gz.tbi
+# JGを使用する場合．本項では解析例に必要な22番染色体のみのデータとなる
+# ほかの染色体については論文やWebサイト等で公開予定
+wget https://zenodo.org/record/7602190/files/dbNSFP4.3a_variant.chr22.liftover_jg2.1.0.txt.gz
+wget https://zenodo.org/record/7602190/files/dbNSFP4.3a_variant.chr22.liftover_jg2.1.0.txt.gz.tbi
+# GRCh38を使用する場合（参考）
+wget https://snpeff.blob.core.windows.net/databases/dbs/GRCh38/dbNSFP_4.1a/dbNSFP4.1a.txt.gz
+wget https://snpeff.blob.core.windows.net/databases/dbs/GRCh38/dbNSFP_4.1a/dbNSFP4.1a.txt.gz.tbi
+
+# コード6
+## JGベースのVCF（merged.vqsr.vcf.gz）を利用．いくつかWARNINGが出力される
+java -Xmx8g -jar snpEff.jar JG2.1.0 examples/merged.vqsr.vcf.gz > ~/snpEff_latest_core/exaples/merged.vqsr.ann.vcf
+## GRCh37ベースのVCF（test.chr22.vcf）を使用
+# test.chr22.ann.vcfがすでに存在するため，データ名に「hand_on」を追記している
+# なお完成データのサイズは異なり，ここで生成されるデータのほうが最新となる
+java -Xmx8g -jar snpEff.jar GRCh37.75 ~/snpEff_latest_core/examples/test.chr22.vcf > ~/snpEff_latest_core/examples/test.chr22.ann.hands_on.vcf
+
+# コード7
+# VCFファイルのQUAL列（6列目）が35以上のバリアントを抽出
+java -jar SnpSift.jar filter "( QUAL >= 35 )" ~/snpEff_latest_core/examples/merged.vqsr.ann.vcf > ~/snpEff_latest_core/examples/merged.vqsr.ann.filtered.QUAL35.vcf
+# VCFファイルのCHROM列（1列目）で染色体番号が22のバリアントを抽出
+# この結果はSnpSift dbNSFPで使用する
+java -jar SnpSift.jar filter "( CHROM = 'chr22' )" ~/snpEff_latest_core/examples/merged.vqsr.ann.vcf > ~/snpEff_latest_core/examples/merged.vqsr.ann.filtered.CHROM22.vcf
+# VCFファイルのREF列（4列目）とALT列（5列目）で，
+# transitionを起こしているバリアントを検出
+## 核酸の変異で，ピリミジン（C,T/U）間，またはプリン（A,G）間の変異をtransition
+## ピリミジンとプリン間での変異をtransversionとよぶ
+## transversionはtransitionに比べ起こりにくい
+java -jar SnpSift.jar filter "(( REF = 'A' ) & ( ALT = 'G' ))|(( REF = 'G' ) & ( ALT = 'A' ))|(( REF = 'C' ) & ( ALT = 'T' ))|(( REF = 'T' ) & ( ALT = 'C'))" ~/snpEff_latest_core/examples/merged.vqsr.ann.vcf > ~/snpEff_latest_core/examples/merged.vqsr.ann.filtered.Transition.vcf
+# ANNフィールド内のAnnotation列（EFFECT）がmissense_variantのバリアントを抽出
+java -jar SnpSift.jar filter "ANN[*].EFFECT has 'missense_variant'" ~/snpEff_latest_core/examples/merged.vqsr.ann.vcf > ~/snpEff_latest_core/examples/merged.vqsr.ann.filtered.missense.vcf
+# ANNフィールド内のAnnotation Impact列（IMPACT）がHIGHのバリアントを抽出
+java -jar SnpSift.jar filter "ANN[*].IMPACT has 'HIGH'" ~/snpEff_latest_core/examples/merged.vqsr.ann.vcf > ~/snpEff_latest_core/examples/merged.vqsr.ann.filtered.high_impact.vcf
+# ANNフィールド内のGene Name列（GENE）がTRMT2Aのバリアントを抽出
+java -jar SnpSift.jar filter "ANN[*].GENE has 'TRMT2A'" ~/snpEff_latest_core/examples/merged.vqsr.ann.vcf > ~/snpEff_latest_core/examples/merged.vqsr.ann.filtered.TRMT2A.vcf
+# ANNフィールド内のTranscript_Biotype列（BIOTYPE）がprotein_codingのバリアントを抽出
+java -jar SnpSift.jar filter "ANN[*].BIOTYPE has 'protein_coding'" ~/snpEff_latest_core/examples/merged.vqsr.ann.vcf > ~/snpEff_latest_core/examples/merged.vqsr.ann.filtered.protein_coding.vcf
+
+# コード8
+# GRCh37ベースのVCFを利用
+java -Xmx16g -jar SnpSift.jar dbnsfp -v -db dbNSFP4.1a.txt.gz ~/snpEff_latest_core/examples/test.chr22.ann.hands_on.vcf > ~/snpEff_latest_core/examples/test.chr22.ann.hands_on.dbnsfp.vcf
+# JGベースのVCFデータのうちchr22のみを抽出した
+# VCFデータ（merged.vqsr.ann.filtered.CHROM22.vcf）を利用
+# 実際にはデータベース内に解析ファイルのバリアントはなく，アノテーションはつかない
+java -Xmx16g -jar SnpSift.jar dbnsfp -v -db dbNSFP4.3a_variant.chr22.liftover_jg2.1.0.txt.gz ~/snpEff_latest_core/examples/merged.vqsr.ann.filtered.CHROM22.vcf > ~/snpEff_latest_core/examples/merged.vqsr.ann.filtered.CHROM22.dbnsfp.vcf

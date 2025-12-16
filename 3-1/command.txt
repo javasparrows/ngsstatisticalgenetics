@@ -1,0 +1,76 @@
+# コード1
+# ダウンロード
+wget https://github.com/brentp/slivar/releases/download/v0.2.8/slivar
+# 実行可能にする
+chmod 755 slivar
+# インストールが成功したかどうかを確認するため実行
+./slivar
+
+# コード2
+. ~/miniconda3/etc/profile.d/conda.sh
+conda create -n slivar
+conda activate slivar
+conda install -c bioconda slivar
+
+# コード3
+wget https://slivar.s3.amazonaws.com/gnomad.hg38.genomes.v3.fix.zip
+
+# コード4
+# son
+wget -c https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz
+wget -c https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz.tbi
+# father
+wget -c https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG003_NA24149_father/NISTv4.2.1/GRCh38/HG003_GRCh38_1_22_v4.2.1_benchmark.vcf.gz
+wget -c https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG003_NA24149_father/NISTv4.2.1/GRCh38/HG003_GRCh38_1_22_v4.2.1_benchmark.vcf.gz.tbi
+# mother
+wget -c https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG004_NA24143_mother/NISTv4.2.1/GRCh38/HG004_GRCh38_1_22_v4.2.1_benchmark.vcf.gz
+wget -c https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG004_NA24143_mother/NISTv4.2.1/GRCh38/HG004_GRCh38_1_22_v4.2.1_benchmark.vcf.gz.tbi
+
+# コード5
+# merge three vcf files into one
+bcftools merge -O z -o tArio.vcf.gz \
+--threads 4 \
+HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz \
+HG003_GRCh38_1_22_v4.2.1_benchmark.vcf.gz \
+HG004_GRCh38_1_22_v4.2.1_benchmark.vcf.gz
+bcftools index -t trio.vcf.gz
+# normalize multi-allelic site format
+bcftools norm --multiallelics -any trio.vcf.gz -Oz -o trio.norm.vcf.gz
+bcftools index trio.norm.vcf.gz
+
+# コード6
+wget https://ftp.ensembl.org/pub/release-108/gff3/homo_sapiens/Homo_sapiens.GRCh38.108.gff3.gz
+
+# コード7
+git clone https://github.com/brentp/slivar.git
+cat ./slivar-master/tests/ashk-trio.ped
+
+# コード8
+# 分析対象のVCFファイル
+vcf=./trio.norm.vcf.gz
+# 血縁関係，性別，罹患状態を示したファイル
+# ash HG002 HG003 HG004 1 2
+# ash HG003 0 0 1 0
+# ash HG004 0 0 2 0
+ped=./slivar-master/tests/ashk-trio.ped
+# 基準ゲノムファイル
+fasta=~/GATKResourceBundle-hg38/v0/Homo_sapiens_assembly38.fasta
+# Ensembl遺伝子領域情報をGFF形式で表したファイル
+gff=Homo_sapiens.GRCh38.108.gff3.gz
+# 出力ファイルのプレフィックス（名前）
+cohort=mycohort
+
+mkdir -p vcfs
+
+bcftools csq -s - --ncsq 40 -g ${gff} -l -f ${fasta} ${vcf} -O u \
+| ./slivar expr --vcf - \
+    --ped ${ped} \
+	-o vcfs/${cohort}.vcf \
+	--pass-only \
+	-g ./gnomad.hg38.genomes.v3.fix.zip \
+	--info 'INFO.impactful && INFO.gnomad_popmax_af < 0.01 && variant.FILTER== "PASS" && variant.ALT[0] != "*" \
+	--js ./slivar-master/js/slivar-functions.js \
+	--family-expr 'denovo:fam.every(segregating_denovo) && INFO.gnomad_popmax_af < 0.001' \
+	--family-expr 'recessive:fam.every(segregating_recessive)' \
+	--family-expr 'x_denovo:(variant.CHROM == "X" || variant.CHROM == "chrX") && fam.every(segregating_denovo_x) && INFO.gnomad_popmax_af < 0.001' \
+	--family-expr 'x_recessive:(variant.CHROM == "X" || variant.CHROM =="chrX") && fam.every(segregating_recessive_x)'

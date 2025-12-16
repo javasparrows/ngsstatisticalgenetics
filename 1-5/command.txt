@@ -1,0 +1,130 @@
+# コード1 
+wget -c https://github.com/broadinstitute/gatk/releases/download/4.4.0.0/gatk-4.4.0.0.zip
+unzip gatk-4.4.0.0.zip
+cd gatk-4.4.0.0
+# conda 環境の構築
+conda config --add channels conda-forge
+conda env create -f gatkcondaenv.yml
+conda activate gatk
+
+# コード2
+./gatk
+
+# コード3
+tar -zxvf tutorial_11684.tar.gz
+
+# コード4
+# 下記の内容のcontiglistを利用する
+cat Tutorial11684/gcnv-chr20XY-contig.list
+# インターバルリストを作る
+./gatk-4.4.0.0/gatk PreprocessIntervals \
+	-R Homo_sapiens_assembly38.fasta \
+	--padding 0 \
+	-L Tutorial11684/gcnv-chr20XY-contig.list \
+	-imr OVERLAPPING_ONLY \
+	-O chr20XY.interval_list
+# 出力ファイルの内容は下記のとおり．@から始まるヘッダ行は省略し，3行分を出力している
+cat chr20XY.interval_list | grep -v ^@ | head -n3
+
+# コード5
+./gatk-4.4.0.0/gatk CollectReadCounts \
+	-L chr20XY.interval_list \
+	-R Homo_sapiens_assembly38.fasta \
+	-imr OVERLAPPING_ONLY \
+	-I ./Tutorial11684/NA19017.chr20sub.bam \
+	--format TSV \
+	-O ./NA19017.tsv
+
+# コード6
+# 出力の確認
+cat NA19017.tsv | grep -v ^@ | head -n5
+
+# コード7
+# オプションで与えた倍数性の事前確率情報を下記のように設定している
+# chr20はdisomyが98%，monosomyまたはtrisomyであることが1%ずつ
+# chrXは2本（女性）または1本（男性）がそれぞれ49%ずつ
+# chrYは0本（女性）または1本（男性）がそれぞれ49.5%ずつ
+cat Tutorial11684/chr20XY_contig_ploidy_priors.tsv
+# 以下の解析はTutorial11684 ディレクトリ以下で実施
+cd Tutorial 11684
+../gatk-4.4.0.0/gatk DetermineGermlineContigPloidy \
+	-L chr20XY.cohort.gc.filtered.interval_list \
+	--interval-merging-rule OVERLAPPING_ONLY \
+	-I cvg/HG00096.tsv -I cvg/HG00268.tsv -I cvg/HG00419.tsv \
+	-I cvg/HG00759.tsv -I cvg/HG01051.tsv -I cvg/HG01112.tsv \
+	-I cvg/HG01500.tsv -I cvg/HG01565.tsv -I cvg/HG01583.tsv \
+	-I cvg/HG01595.tsv -I cvg/HG01879.tsv -I cvg/HG02568.tsv \
+	-I cvg/HG02922.tsv -I cvg/HG03006.tsv -I cvg/HG03052.tsv \
+	-I cvg/HG03642.tsv -I cvg/HG03742.tsv -I cvg/NA18525.tsv \
+	-I cvg/NA18939.tsv -I cvg/NA19017.tsv -I cvg/NA19625.tsv \
+	-I cvg/NA19648.tsv -I cvg/NA20502.tsv -I cvg/NA20845.tsv \
+	--contig-ploidy-priors chr20XY_contig_ploidy_priors.tsv \
+	--output . \
+	--output-prefix ploidy \
+	--verbosity DEBUG
+
+# コード8
+../gatk-4.4.0.0/gatk GermlineCNVCaller \
+	--run-mode COHORT \
+	-L scatter-sm/twelve_1of2.interval_list \
+	-I cvg/HG00096.tsv -I cvg/HG00268.tsv -I cvg/HG00419.tsv \
+	-I cvg/HG00759.tsv -I cvg/HG01051.tsv -I cvg/HG01112.tsv \
+	-I cvg/HG01500.tsv -I cvg/HG01565.tsv -I cvg/HG01583.tsv \
+	-I cvg/HG01595.tsv -I cvg/HG01879.tsv -I cvg/HG02568.tsv \
+	-I cvg/HG02922.tsv -I cvg/HG03006.tsv -I cvg/HG03052.tsv \
+	-I cvg/HG03642.tsv -I cvg/HG03742.tsv -I cvg/NA18525.tsv \
+	-I cvg/NA18939.tsv -I cvg/NA19017.tsv -I cvg/NA19625.tsv \
+	-I cvg/NA19648.tsv -I cvg/NA20502.tsv -I cvg/NA20845.tsv \
+	--contig-ploidy-calls ploidy-calls \
+	--annotated-intervals twelveregions.annotated.tsv \
+	--interval-merging-rule OVERLAPPING_ONLY \
+	--output cohort24-twelve \
+	--output-prefix cohort24-twelve_1of2 \
+	--verbosity DEBUG
+../gatk-4.4.0.0/gatk GermlineCNVCaller \
+	--run-mode COHORT \
+	-L scatter-sm/twelve_2of2.interval_list \
+	-I cvg/HG00096.tsv -I cvg/HG00268.tsv -I cvg/HG00419.tsv \
+	-I cvg/HG00759.tsv -I cvg/HG01051.tsv -I cvg/HG01112.tsv \
+	-I cvg/HG01500.tsv -I cvg/HG01565.tsv -I cvg/HG01583.tsv \
+	-I cvg/HG01595.tsv -I cvg/HG01879.tsv -I cvg/HG02568.tsv \
+	-I cvg/HG02922.tsv -I cvg/HG03006.tsv -I cvg/HG03052.tsv \
+	-I cvg/HG03642.tsv -I cvg/HG03742.tsv -I cvg/NA18525.tsv \
+	-I cvg/NA18939.tsv -I cvg/NA19017.tsv -I cvg/NA19625.tsv \
+	-I cvg/NA19648.tsv -I cvg/NA20502.tsv -I cvg/NA20845.tsv \
+	--contig-ploidy-calls ploidy-calls \
+	--annotated-intervals twelveregions.annotated.tsv \
+	--interval-merging-rule OVERLAPPING_ONLY \
+	--output cohort24-twelve \
+	--output-prefix cohort24-twelve_2of2 \
+	--verbosity DEBUG
+# 出力の確認．出力はcohort24-twelveディレクトリ以下に出力される
+# このうち，-calls以下にSAMPLE_0 ~ SAMPLE_23のディレクトリがあり，
+# ここにサンプルごとのコール結果が出力される
+ls cohort24-twelve/
+
+# コード9
+# sample id 19 = NA19017の結果の出力
+../gatk-4.4.0.0/gatk PostprocessGermlineCNVCalls \
+	--model-shard-path cohort24-twelve/cohort24-twelve_1of2-model \
+	--model-shard-path cohort24-twelve/cohort24-twelve_2of2-model \
+	--calls-shard-path cohort24-twelve/cohort24-twelve_1of2-calls \
+	--calls-shard-path cohort24-twelve/cohort24-twelve_2of2-calls \
+	--allosomal-contig chrX \
+	--allosomal-contig chrY \
+	--contig-ploidy-calls ploidy-calls \
+	--sample-index 19 \
+	--output-genotyped-intervals genotyped-intervals-cohort24-twelve-NA19017.vcf.gz
+	--output-genotyped-segments genotyped-segments-cohort24-twelve-NA19017.vcf.gz
+	--output-denoised-copy-ratios denoised-copy-ratios.NA19017.tsv \
+	--sequence-dictionary ../Homo_sapiens_assembly38.dict
+# 出力の確認1. TSV
+cat denoised-copy-ratios.NA19017.tsv | grep -v ^@ | head -n5
+
+# 出力の確認2. Interval VCF
+zcat genotyped-intervals-cohort24-twelve-NA19017.vcf.gz | grep -v ^## | head -n5
+
+# 出力の確認3. Segment VCF
+zcat genotyped-segments-cohort24-twelve-NA19017.vcf.gz | grep -v ^## | head -n5
+
+

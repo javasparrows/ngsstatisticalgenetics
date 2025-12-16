@@ -1,0 +1,67 @@
+# コード1
+# ダウンロードする
+wget https://github.com/brentp/vcfanno/releases/download/v0.3.4/vcfanno_linux64
+# 実行可能にする
+chmod 755 vcfanno_linux64
+# インストールできたことの確認とコマンド実行後の標準出力
+./vcfanno_linux64
+# コマンドのバージョンとマニュアルが表示される
+
+# コード2 
+# conda環境をセットアップする
+. ~/miniconda3/etc/profile.d/conda.sh
+# vcfanno専用の環境を構築する
+conda create -n vcfanno
+# 作成したvcfanno環境をアクティベートする
+conda activate vcfanno
+# vcfannoをbiocondaチャンネルからインストールする
+conda install -c bioconda vcfanno
+
+# コード3 
+# ダウンロード
+wget https://github.com/brentp/vcfanno/archive/refs/heads/master.zip
+# 展開
+unzip master.zip
+# 展開したディレクトリに移動
+cd vcfanno-master
+# exampleディレクトリの中身のファイルを表示
+ls example
+
+# コード4
+# exampleディレクトリに移動する
+cd example
+# テキストエディタで内容を編集する
+vi conf.toml
+
+# コード5
+[[annotation]]
+file="exac.vcf.gz"
+# the special name 'ID' pulls out the rs id from the VCF
+fields=["AC_AFR", "AC_AMR", "AC_EAS", "ID"]
+ops=["first", "first", "first", "first"]
+
+# コード6
+# 実行ディレクトリは~/vcfanno-master/example/である
+# バイナリファイルは2 つ上のディレクトリにある
+../../vcfanno_linux64 conf.toml query.vcf.gz > annotated.vcf
+
+# コード7
+# 元のVCFファイルのchr1, 69270 bpの値
+zcat query.vcf.gz | grep 69270
+# データ源のVCFファイルのchr1, 69270 bpの値
+zcat exac.vcf.gz | grep 69270
+# アノテーション後のVCFファイルのchr1, 69270bpの値
+cat annotated.vcf | grep 69270
+
+# コード8
+# conf2.tomlとして下記を保存
+[[annotation]]
+file="exac.vcf.gz"
+# the special name 'ID' pulls out the rs id from the VCF
+fields=["AC_AFR", "AC_AMR", "AC_EAS", "ID"]
+names=["ac_afr", "ac_amr", "ac_eas", "ID"]
+ops=["first", "first", "first", "first"]
+
+# コード9
+# 実行
+../../vcfanno_linux64 conf2.toml query.vcf.gz > annotated2.vcf

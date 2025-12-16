@@ -1,0 +1,81 @@
+# コード1
+# 1. htslibリポジトリのクローンを作成
+git clone --recurse-submodules https://github.com/samtools/htslib.git
+# 2. bcftoolsリポジトリのクローンを作成
+git clone https://github.com/samtools/bcftools.git
+# 3. bcftoolsディレクトリに移動後，bcftoolsのインストール
+cd bcftools
+./configure
+make
+make install
+# 4. インストールの確認
+bcftools
+# bcftoolsのバージョンとマニュアルが表示される
+
+# コード2
+# 1. ホームディレクトリに移動
+cd
+# 2. 作業ディレクトリを作成
+mkdir ~/VCF-prepro
+# 3. VCFファイルのダウンロード先のディレクトリに移動
+cd ~/Downloads
+# 4. ダウンロードしたVCFファイルを作業ディレクトリに移すと同時にファイル名を変更
+mv tommo-3.5kjpnv2-20181105open-af_snvindelall.vcf.gz ~/VCF-prepro/3.5kjpn.vcf.gz
+# 5. 作業ディレクトリに移動
+cd ~/VCF-prepro
+# 6. 作業ディレクトリ内にVCFファイルが存在しているかを確認
+ls
+
+# コード3
+bcftools view 3.5kjpn.vcf.gz | head -150
+
+# コード4
+bcftools view 3.5kjpn.vcf.gz -h
+
+# コード6
+bcftools view 3.5kjpn.vcf.gz -H | head -5
+
+# コード8
+bcftools view 3.5kjpn.vcf.gz -H | wc -l
+
+# コード9
+bcftools filter -i 'CHROM="6"' 3.5kjpn.vcf.gz -o 3.5kjpn-chr6.vcf.gz
+
+# コード10
+# 6番染色体で観察されるSNVの計数
+bcftools view 3.5kjpn-chr6.vcf.gz -H | wc -l
+# 先頭から10カ所のSNV が6番染色体かを確認
+bcftools view 3.5kjpn-chr6.vcf.gz -H | head -10
+# 最終行から10カ所のSNVが6番染色体かを確認
+bcftools view 3.5kjpn-chr6.vcf.gz -H | tail -10
+# 他染色体のSNVがないことを確認
+bcftools view 3.5kjpn-chr6.vcf.gz -H | grep -v "^6"
+
+# コード11
+bcftools filter -i 'INFO/AF>=0.01' 3.5kjpn-chr6.vcf.gz -o 3.5kjpn-chr6-AF0.01.vcf.gz
+
+# コード12
+bcftools view -m3 -M3 3.5kjpn-chr6-AF0.01.vcf.gz -H | head -5
+
+# コード13
+bcftools view -m3 -M3 3.5kjpn-chr6-AF0.01.vcf.gz -H | head -5
+
+# コード14
+bcftools norm -m -snps 3.5kjpn-chr6.vcf.gz -o 3.5kjpn-chr6-norm.vcf.gz
+
+# コード15
+bcftools filter -i 'INFO/AF>=0.01' 3.5kjpn-chr6-norm.vcf.gz -o 3.5kjpn-chr6-norm-AF0.01.vcf.gz
+
+# コード16 
+bcftools norm -m +snps 3.5kjpn-chr6-norm-AF0.01.vcf.gz -o 3.5kjpn-chr6-AF0.01-mod.vcf.gz
+
+# コード17
+bcftools view 3.5kjpn-chr6-AF0.01-mod.vcf.gz -h | tail -10
+
+# コード19
+# VCFファイルからCHROM・POS・REF・ALT列を取り出す
+bcftools query -f '%CHROM %POS %REF %ALT \n' 3.5kjpn.vcf.gz | head -10
+# VCFファイルからCHROM・POS・REF・ALT列をタブ区切りで取り出す
+bcftools query -f '%CHROM¥t%POS¥t%REF¥t%ALT \n' 3.5kjpn.vcf.gz | head -10
+# VCFファイルからCHROM・POS・REF・ALT列をタブ区切りで取り出しヘッダを挿入する
+bcftools query -f '%CHROM¥t%POS¥t%REF¥t%ALT¥t%INFO/AC¥n' 3.5kjpn.vcf.gz -H | head -10

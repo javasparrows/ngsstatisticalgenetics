@@ -1,0 +1,23 @@
+# コード1
+wget https://data.monarchinitiative.org/exomiser/13.1.0/exomiser-cli-13.1.0-distribution.zip
+unzip exomiser-cli-13.1.0-distribution.zip
+java -jar exomiser-cli-13.1.0/exomiser-cli-13.1.0.jar
+# コマンドのマニュアルが表示される
+
+# コード2
+# hg19座標（38.3GB; 展開後59GB）
+wget https://data.monarchinitiative.org/exomiser/data/2209_hg19.zip
+# hg38座標（38.6GB; 展開後60GB）
+wget https://data.monarchinitiative.org/exomiser/data/2209_hg38.zip
+# 表現型情報（2.6GB; 展開後13GB）
+wget https://data.monarchinitiative.org/exomiser/data/2209_phenotype.zip
+
+# コード3
+cp ./exomiser-13.1.0-cli/application.properties .
+cp -R ./exomiser-13.1.0-cli/examples .
+
+# コード7
+mkdir -p results
+java -Xmx10G -jar ./exomiser-13.1.0-cli/exomiser-cli-13.1.0.jar \
+	--analysis test-analysis.yml \
+	--exomiser.data-directory=./

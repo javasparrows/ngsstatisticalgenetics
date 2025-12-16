@@ -1,0 +1,124 @@
+# コード1
+cd
+mkdir VariantStructure/
+cd VariantStructure/
+
+# コード2
+cp ~/Downloads/VariantStructure-main.zip ./
+unzip VariantStruccture-main.zip
+
+# コード3
+cp VariantStructure-main/scripts/* ./
+
+# コード4
+conda create -n pymol
+
+# コード5
+conda activate pymol
+
+# コード6
+conda install -c conda-forge pymol-open-source
+
+# コード8
+pymol &
+
+# コード9 
+apt-get install mkdssp
+
+# コード11 
+cp ~/Downloads/foldx5Linux64.tar_.gz ./
+tar xzf foldx5Linux64.tar_.gz
+
+# コード12
+mkdir ~/VariantStructure/TP53
+cd ~/VariantStructure/TP53
+
+# コード13
+mv ~/Downloads/Homo_sapiens_ENSP00000269305_4_sequence.fa ./
+
+# コード14
+bash ../format_single_fasta.sh Homo_sapiens_ENSP00000269305_4_sequence.fa
+
+# コード16 
+mv ~/Downloads/pdb1gzh.ent ./
+mv ~/Downloads/AF-P04637-F1-model_v4.pdb ./
+
+# コード17
+conda activate pymol
+
+# コード18
+pymol &
+
+# コード40
+bash ../get_plddt.sh AF-P04637-F1-model_v4.pdb A 179
+
+# コード41
+mkdssp pdb1gzh.ent 1gzh.dssp
+
+# コード42
+python3 ../process_dssp_output.py -i 1gzh.dssp -c A -r 179 -f rASA
+
+# コード43
+ln -s pdb1gzh.ent pdb1gzh.pdb
+
+# コード44
+echo "HA179Q;" > individual_list.txt
+
+# コード45
+../foldx_20231231 --command BuildModel \ # コマンド．ΔΔGを計算
+	--pdb=pdb1gzh.pdb \ # 元のPDB ファイル
+	--mutant-file=individual_list.txt \ # 変異のリスト
+	--numberOfRuns 5 # 繰り返し試行の回数
+	
+# コード46
+../foldx20231231 --command BuildModel \ # コマンド．ΔΔGを計算
+	--pdb=AF-P04637-F1-model_v4.pdb \ # 元のPDB ファイル
+	--mutant-file=individual_list.txt \ # 変異のリスト
+	--numberOfRuns 5 # 繰り返し試行の回数
+
+# コード47
+mkdir ~/VariantStructure/GJA8
+cd ~/VariantStructure/GJA8
+mv ~/Downloads/Homo_sapiens_ ENSP00000358238_1_sequence.fa ./
+bash ../format_single_fasta.sh Homo_sapiens_ ENSP00000358238_1_sequence.fa
+
+# コード48
+mv ~/Downloads/pdb7jjp.ent ./
+mv ~/Downloads/AF-P48165-F1-model_v4.pdb ./
+
+# コード49
+pymol &
+
+# コード66
+bash ../select_chain_from_pdb.sh pdb7jjp.ent A > 7jjp_A.pdb
+
+# コード67
+mkdssp 7jjp_A.pdb 7jjp_A.dssp
+
+# コード68
+python3 ../process_dssp_output.py -i 7jjp_A.dssp -c A -r 208 -f rASA
+
+# コード69
+mkdssp ../pdb7jjp.ent 7jjp.dssp
+python3 process_dssp_output.py -i 7jjp.dssp -c A -r 208 -f rASA
+
+# コード70
+python3 ../process_dssp_output.py -i 7jjp.dssp -m 7jjp_A.dssp -c A -r 208 -f drASA
+
+# コード71
+ln -s pdb7ppj.ent 7ppj.pdb
+echo "EA208G;" > individual_list.txt
+echo "EA208G;XB208G;EC208G;ED208G;EE208G;EF208G;EG208G;EH208G;EI208G;EJ208G;EK208G;" >> individual_list.txt
+
+# コード72
+Foldx_20231231 --command BuildModel \ # コマンド．ΔΔGを計算
+  --pdb=7ppj.pdb \ # 元のPDBファイル
+  --mutant-file=individual_list.txt \ # 変異のリスト
+  --numberOfRuns 5 # 繰り返し試行の回数
+
+# コード73
+echo "EA201G;" > individual_list_AF.txt \
+     foldx_20231231 --command BuildModel \ # コマンド．ΔΔGを計算
+     --pdb=AF-P48165-F1-model_v4.pdb \ # 元のPDBファイル
+     --mutant-file=individual_list_AF.txt \ # 変異のリスト
+     --numberOfRuns 5 # 繰り返し試行の回数
