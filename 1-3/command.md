@@ -556,6 +556,29 @@ done
 # ↑2025/12/15 11秒かかった sh ~/variant_call/tools/run_vqsr.sh
 ```
 
+### バリアントの分割
+
+```bash
+# 検出されたバリアントをフィルタリングするためにSNVとindelに分割する
+# SNVの抽出
+~/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" SelectVariants \
+  --reference ~/variant_call/materials/JG.fa \
+  --variant ~/variant_call/results/merged.vcf.gz \
+  --select-type-to-include SNP \
+  --output ~/variant_call/intermediate/merged.snv.vcf.gz
+
+# ↑2025/12/16 数秒かかった
+
+# Indelの抽出
+~/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" SelectVariants \
+  --reference ~/variant_call/materials/JG.fa \
+  --variant ~/variant_call/results/merged.vcf.gz \
+  --select-type-to-include INDEL \
+  --output ~/variant_call/intermediate/merged.indel.vcf.gz
+
+# ↑2025/12/16 数秒かかった
+```
+
 
 ### IndelのVariantRecalibrator
 
@@ -571,6 +594,8 @@ done
   --max-gaussians 4 \
   --output ~/variant_call/intermediate/indel.recal \
   --tranches-file ~/variant_call/intermediate/indel.tranches
+
+# ↑2025/12/16 数秒かかった
 ```
 
 ### ApplyVQSR
@@ -586,6 +611,7 @@ done
   --recal-file ~/variant_call/intermediate/snv.recal \
   --create-output-variant-index true \
   -mode SNP
+# ↑2025/12/16 数秒かかった
 
 # Indel用ApplyVQSR
 ~/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" ApplyVQSR \
@@ -596,6 +622,7 @@ done
   --recal-file ~/variant_call/intermediate/indel.recal \
   --create-output-variant-index true \
   -mode INDEL
+# ↑2025/12/16 数秒かかった
 ```
 
 ### VCFファイルの統合
@@ -606,28 +633,10 @@ done
   --OUTPUT ~/variant_call/results/merged.vqsr.vcf.gz \
   --INPUT ~/variant_call/intermediate/merged.snv.vqsr.vcf.gz \
   --INPUT ~/variant_call/intermediate/merged.indel.vqsr.vcf.gz
+# ↑2025/12/16 数秒かかった
 ```
 
 ## コード17: ハードフィルタリング
-
-### バリアントの分割
-
-```bash
-# 検出されたバリアントをフィルタリングするためにSNVとindelに分割する
-# SNVの抽出
-~/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" SelectVariants \
-  --reference ~/variant_call/materials/JG.fa \
-  --variant ~/variant_call/results/merged.vcf.gz \
-  --select-type-to-include SNP \
-  --output ~/variant_call/intermediate/merged.snv.vcf.gz
-
-# Indelの抽出
-~/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" SelectVariants \
-  --reference ~/variant_call/materials/JG.fa \
-  --variant ~/variant_call/results/merged.vcf.gz \
-  --select-type-to-include INDEL \
-  --output ~/variant_call/intermediate/merged.indel.vcf.gz
-```
 
 ### VariantFiltrationによるフィルタリング
 
@@ -638,22 +647,24 @@ done
   --reference ~/variant_call/materials/JG.fa \
   --variant ~/variant_call/intermediate/merged.snv.vcf.gz \
   --output ~/variant_call/intermediate/merged.snv.hardfiltering.vcf.gz \
-  --filter-expression "QD < 2.0" \
-  --filter-expression "FS > 60.0" \
-  --filter-expression "SOR > 3.0" \
-  --filter-expression "ReadPosRankSum < -8.0" \
-  --filter-expression "MQ < 40.0" \
-  --filter-expression "MQRankSum < -12.5"
+  --filter-name "QD_filter" --filter-expression "QD < 2.0" \
+  --filter-name "FS_filter" --filter-expression "FS > 60.0" \
+  --filter-name "SOR_filter" --filter-expression "SOR > 3.0" \
+  --filter-name "ReadPosRankSum_filter" --filter-expression "ReadPosRankSum < -8.0" \
+  --filter-name "MQ_filter" --filter-expression "MQ < 40.0" \
+  --filter-name "MQRankSum_filter" --filter-expression "MQRankSum < -12.5"
+# ↑2025/12/16 数秒かかった
 
 # indelの設定
 ~/variant_call/tools/gatk-4.3.0.0/gatk --java-options "-Xmx4g" VariantFiltration \
   --reference ~/variant_call/materials/JG.fa \
   --variant ~/variant_call/intermediate/merged.indel.vcf.gz \
   --output ~/variant_call/intermediate/merged.indel.hardfiltering.vcf.gz \
-  --filter-expression "QD < 2.0" \
-  --filter-expression "FS > 200.0" \
-  --filter-expression "SOR > 10.0" \
-  --filter-expression "ReadPosRankSum < -20.0"
+  --filter-name "QD_filter" --filter-expression "QD < 2.0" \
+  --filter-name "FS_filter" --filter-expression "FS > 200.0" \
+  --filter-name "SOR_filter" --filter-expression "SOR > 10.0" \
+  --filter-name "ReadPosRankSum_filter" --filter-expression "ReadPosRankSum < -20.0"
+# ↑2025/12/16 数秒かかった
 ```
 
 ### 最終的なVCFファイルの統合
@@ -664,4 +675,5 @@ done
   --OUTPUT ~/variant_call/results/merged.hardfiltering.vcf.gz \
   --INPUT ~/variant_call/intermediate/merged.snv.hardfiltering.vcf.gz \
   --INPUT ~/variant_call/intermediate/merged.indel.hardfiltering.vcf.gz
+# ↑2025/12/16 数秒かかった
 ```

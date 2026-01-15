@@ -1,0 +1,68 @@
+# Git関連
+.git
+.gitignore
+.gitattributes
+
+# Docker関連
+.dockerignore
+docker-compose.override.yml
+
+# データファイル（ビルド時には含めない）
+data/
+materials/
+results/
+intermediate/
+logs/
+*.fastq.gz
+*.bam
+*.sam
+*.vcf
+*.vcf.gz
+*.g.vcf
+*.cram
+
+# 一時ファイル
+*.tmp
+*.log
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Python関連
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+
+# IDEやエディタ関連
+.vscode/
+.idea/
+*.sublime-*
+.project
+.classpath
+.settings/
+
+# OS関連
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Desktop.ini
+$RECYCLE.BIN/
+
+# ドキュメント（README_DOCKER.mdは除く）
+*.md
+!README_DOCKER.md
+
+# その他の大きなファイル
+*.tar.gz
+*.zip
+*.bz2
+*.gz
+*.tgz

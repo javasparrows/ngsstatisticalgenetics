@@ -1,0 +1,75 @@
+services:
+  ngs-pipeline:
+    # イメージ名
+    image: ngs-statistical-genetics:latest
+
+    # コンテナ名
+    container_name: ngs-variant-calling
+
+    # プラットフォーム指定（Apple Silicon対応）
+    platform: linux/amd64
+
+    # Dockerfileからビルド
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+
+    # リソース制限（必要に応じて調整）
+    deploy:
+      resources:
+        limits:
+          cpus: '8'      # 最大CPUコア数（環境に応じて調整）
+          memory: 64G     # 最大メモリ（環境に応じて調整）
+        reservations:
+          cpus: '4'       # 最小CPUコア数
+          memory: 32G     # 最小メモリ
+
+    # ボリュームマウント
+    volumes:
+      # ホストのカレントディレクトリをコンテナの/dataにマウント
+      - ./data:/variant_call/materials
+      - ./results:/variant_call/results
+      - ./intermediate:/variant_call/intermediate
+      - ./logs:/variant_call/logs
+
+      # スクリプトファイル（編集可能にするため）
+      - ./download_files.sh:/variant_call/download_files.sh
+      - ./run_all.sh:/variant_call/run_all.sh
+
+      # ツールの永続化（オプション：再ダウンロードを避けるため）
+      - ngs-tools:/variant_call/tools
+
+    # 作業ディレクトリ
+    working_dir: /variant_call
+
+    # デフォルトコマンド（起動時にbashを実行）
+    command: /bin/bash
+
+    # TTYとSTDINを有効化（インタラクティブモード用）
+    stdin_open: true
+    tty: true
+
+    # 環境変数
+    environment:
+      - TZ=Asia/Tokyo
+      - JAVA_OPTS=-Xmx32g
+      - THREADS=8
+
+    # ネットワーク設定
+    networks:
+      - ngs-network
+
+    # 再起動ポリシー
+    restart: unless-stopped
+
+# 名前付きボリューム（ツールの永続化用）
+volumes:
+  ngs-tools:
+    driver: local
+
+# ネットワーク
+networks:
+  ngs-network:
+    driver: bridge

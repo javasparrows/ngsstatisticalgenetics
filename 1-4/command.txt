@@ -1,10 +1,44 @@
+# コード0: Apple Silicon MacでSingularity/Apptainerのセットアップ
+# Apple Silicon MacではSingularityをネイティブに実行できないため、Limaを使用してLinux環境を構築する
+
+## Limaのインストール
+brew install lima
+
+## Lima VMの作成と起動（Ubuntu 22.04）
+limactl start --name=singularity template://ubuntu
+limactl create default
+
+## VM内でApptainerをインストール
+lima sudo apt-get update
+lima sudo apt-get install -y software-properties-common
+lima sudo add-apt-repository -y ppa:apptainer/ppa
+lima sudo apt-get update
+lima sudo apt-get install -y apptainer
+# ↑2025/12/16 数秒かかった
+
+## Apptainerの動作確認
+lima apptainer --version
+
+## 便利なエイリアスの設定（オプション）
+# ~/.config/fish/config.fish に追加する場合（fishシェル）
+echo "alias singularity='lima apptainer'" >> ~/.config/fish/config.fish
+# ~/.bashrc または ~/.zshrc に追加する場合
+# echo "alias singularity='lima apptainer'" >> ~/.bashrc
+
+## 以降のsingularityコマンドは「lima apptainer」として実行する
+# または、エイリアスを設定した後はそのまま「singularity」として実行可能
+
 # コード1
 # 公式サイトからdockerイメージをダウンロード
-singularity pull docker://brentp/smoove
+lima apptainer pull docker://brentp/smoove
+# または、エイリアスを設定した場合：
+# singularity pull docker://brentp/smoove
 # インストールできたかの確認．下記のコマンドを実行すると，
 # 必要なソフトがインストールされていれば[Y]と表示され，
 # インストールされていなければ[ ]となる
-singularity exec smoove_latest.sif smoove -h
+lima apptainer exec smoove_latest.sif smoove -h
+# または、エイリアスを設定した場合：
+# singularity exec smoove_latest.sif smoove -h
 # 以下，コマンドの使い方が示される
 
 # コード2
@@ -16,6 +50,7 @@ wget https://github.com/hall-lab/speedseq/blob/master/annotations/exclude.cnvnat
 mkdir -p cram
 cd cram
 wget -c ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR324/ERR3240193/HG00118.final.cram
+# ↑100GBくらいありそう、柏田のMacには厳しい
 wget -c ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR324/ERR3240144/HG00138.final.cram
 wget -c ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR324/ERR3240146/HG00140.final.cram
 wget -c ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR324/ERR3240150/HG00145.final.cram
